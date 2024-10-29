@@ -1,0 +1,196 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% This theme is for ARL slides in widescreen (16:9) format
+%
+% Usage: use beamer class
+%
+%     \documentclass[12pt, compress, aspectratio=169]{beamer}
+%
+% and e.g.
+%
+%     \input{arlwide_theme/theme.tex}
+%     \title[Optimal pulse schemes for atom interferometry]{%
+%       Optimal pulse schemes \\for high-precision atom interferometry}
+%     \author[Michael Goerz (goerz@stanford.edu)]{%
+%       {\bf M. Goerz}$^1$, P. Kunz$^1$, M. Kasevich$^2$, V. Malinovsky$^1$
+%     }
+%     \institute[\protect{\includegraphics[height=5pt]{images/arl}}]{%
+%       $^1$U.S. Army Research Lab, $^2$Stanford University
+%     }
+%     \date{August 23, 2018}
+%
+% in the header of the tex file. Make sure to disable any footer on the
+% titlepage:
+%
+%     {%  Title page
+%       \setbeamertemplate{footline}{}
+%       \frame{\titlepage}
+%     }
+%     \addtocounter{framenumber}{-1}
+%
+% NOTE: for documentation of how to modify templates, in addition to the Beamer
+% user guide, use
+% http://www.cpt.univ-mrs.fr/~masson/latex/Beamer-appearance-cheat-sheet.pdf
+%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\usepackage{tikz}
+\usetikzlibrary{calc}
+\usetikzlibrary{positioning}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% Grid %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Set up grid for absolute text positioning (page size = 16 x 9 cm)
+\usepackage[absolute, overlay]{textpos}
+% \usepackage[absolute, overlay, showboxes]{textpos} % (`showboxes` for debugging)
+\textblockorigin{0cm}{0cm} % The grid guides start from top left
+\setlength{\TPHorizModule}{1cm} % Units are 1 cm ...
+\setlength{\TPVertModule}{1cm} % ... and y coordinates point down
+% Now you can use e.g.:
+%    \begin{textblock}{3}(4,2)
+%      \dots
+%    \end{textblock}
+% to place a block 3cm wide, 4cm right and 2cm up from the bottom left corner
+%%%%%%%%%%%%%%%%%%%%%%%%%%% Theme Settings %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\definecolor{DarkBlue}{rgb}{0.1,0.1,0.5}
+\definecolor{DarkRed}{rgb}{0.75,0.,0.}
+\definecolor{Magenta}{rgb}{1.0,0.0,1.0}
+\definecolor{Red}{rgb}{0.894,0.102,0.110}
+\definecolor{Green}{rgb}{0.302,0.686,0.290}
+\definecolor{Blue}{rgb}{0.216,0.494,0.722}
+\definecolor{Orange}{rgb}{1.000,0.498,0.000}
+\definecolor{Yellow}{rgb}{0.824,0.824,0.082}
+\definecolor{Brown}{rgb}{0.651,0.337,0.157}
+\definecolor{LightBlue}{rgb}{0.651,0.808,0.890}
+\definecolor{Purple}{rgb}{0.596,0.306,0.639}
+\definecolor{LightPurple}{rgb}{0.792,0.698,0.839}
+\definecolor{Grey}{rgb}{0.600,0.600,0.600}
+\definecolor{LightGreen}{rgb}{0.698,0.875,0.541}
+\definecolor{LightOrange}{rgb}{0.992,0.749,0.435}
+\definecolor{Pink}{rgb}{0.969,0.506,0.749}
+\definecolor{Black}{rgb}{0.000,0.000,0.000}
+\definecolor{LightRed}{rgb}{0.984,0.604,0.600}
+\definecolor{White}{rgb}{1.000,1.000,1.000}
+
+\definecolor{ARLGray25}{rgb}{0.698,0.698,0.698}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%% Theme Settings %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\usetheme{Berlin}
+\useoutertheme{shadow}
+\useinnertheme{default}
+\setbeamercolor{palette primary}{use=structure,fg=black,bg=black!20!white}
+\setbeamercolor{palette secondary}{use=structure,fg=black,bg=black!25!white}
+\setbeamercolor{palette tertiary}{use=structure,fg=black,bg=black!30!white}
+\setbeamercolor{palette quaternary}{use=structure,fg=black,bg=black!35!white}
+\setbeamercolor{sidebar}{use=structure,bg=structure.fg!20!white}
+\setbeamercolor{palette sidebar primary}{use=normal text,fg=normal text.fg}
+\setbeamercolor{palette sidebar secondary}{use=structure,fg=structure.fg}
+\setbeamercolor{palette sidebar tertiary}{use=normal text,fg=normal text.fg}
+\setbeamercolor{palette sidebar quaternary}{use=structure,fg=structure.fg}
+\setbeamercolor*{titlelike}{parent=palette primary}
+\setbeamercolor*{separation line}{}
+\setbeamercolor*{fine separation line}{}
+\setbeamertemplate{blocks}[rounded][shadow=false]
+\setbeamerfont{title}{family*=phv, size*={20}{24}}
+\setbeamerfont{author}{family*=phv, size*={12}{14}}
+\setbeamerfont{institute}{family*=phv, size*={8.0}{12}}
+\setbeamerfont{date}{family*=phv, size*={8.0}{12}}
+\setbeamerfont{classification}{family*=phv, size*={3.78}{4.5}}
+\setbeamerfont{frametitle}{series=\bfseries, family*=phv, size*={11.34}{14}}
+\defbeamertemplate*{title page}{customized}[1][]{%
+  \tikz[overlay,remember picture] (current page.south west) rectangle (current page.north east);
+  \begin{textblock}{14}(0.0,0.0)
+    \includegraphics[width=\textwidth]{arlwide_theme/arl_devcom_title}
+  \end{textblock}
+  \begin{textblock}{14}(1,2.75)
+    \begin{center}
+      \setlength{\baselineskip}{24pt} % cf. height of \setbeamerfont{title}
+      {\color{black} \usebeamerfont{title} \inserttitle}
+    \end{center}
+  \end{textblock}
+  \begin{textblock}{14}(1,5.0)
+    \begin{center}
+      {\color{black} \usebeamerfont{author} \insertauthor}
+    \end{center}
+  \end{textblock}
+  \begin{textblock}{14}(1,6.25)
+    \begin{center}
+      {\color{black} \usebeamerfont{institute} \insertinstitute}
+    \end{center}
+  \end{textblock}
+  \begin{textblock}{14}(1,7.5)
+    \begin{center}
+      {\color{black} \usebeamerfont{date} \insertdate}
+    \end{center}
+  \end{textblock}
+}
+\setbeamertemplate{background canvas}{%
+  % textblock does not work in background canvas, for some reason
+  %\tikz[overlay,remember picture] \node[at=(current page.center)]{%
+    %\includegraphics[height=\paperheight,width=\paperwidth]
+    %{arlwide_theme/titleexample.pdf}};
+  \begin{tikzpicture}[remember picture, overlay]
+    %%% grid for positioning (debugging)
+    %\draw[step=1cm, color=blue, opacity=0.2]
+    %(current page.south west) grid (current page.north east);
+    %\foreach \x in {0,...,15}{%
+      %\node[inner sep = 0, below right = 3mm and \x of current page.north west]
+      %{\tiny\x};}
+    %\foreach \y in {1,...,8}{%
+      %\node[inner sep = 0, below right = \y and 0mm of current page.north west]
+      %{\tiny\y};}
+    %%%%
+    \node[above=-1.5pt] at (current page.south)
+      {\color{ARLGray25} \usebeamerfont{classification} UNCLASSIFIED};
+    %\node[below=-1.5pt] at (current page.north)
+    %  {\color{ARLGray25} \usebeamerfont{classification} UNCLASSIFIED};
+  \end{tikzpicture}
+}
+
+\setbeamertemplate{headline}{}
+\setbeamertemplate{footline}{%
+  \hbox{%
+  \begin{beamercolorbox}[
+      wd=1.0\paperwidth,ht=2.5ex,dp=1.125ex,leftskip=.3cm,
+      rightskip=.3cm]{}%
+    \usebeamerfont{title in head/foot}%
+    {\color{gray} \insertshortauthor \hfill%
+    \insertframenumber\,/\,\inserttotalframenumber}%
+  \end{beamercolorbox}%
+  }%
+  \begin{tikzpicture}[remember picture, overlay]
+    \node[anchor=north east, xshift=-5pt] at (current page.north east) {%
+      {\color{gray} \insertshorttitle}};
+  \end{tikzpicture}
+}
+
+\setbeamertemplate{frametitle}{%
+  \begin{center}{\insertframetitle}\end{center}
+}
+
+
+\usefonttheme[onlysmall]{structurebold}
+\setbeamertemplate{bibliography item}{%
+  \lower2pt\hbox{\pgfuseimage{beamericonarticle}}\insertbiblabel}
+\mode<presentation>{\beamertemplatenavigationsymbolsempty}
+%\setbeamercolor{block title}{use=structure,fg=white,bg=red!75!black}
+%\setbeamercolor{block body}{use=structure,fg=black,bg=red!20!white}
+
+\newcommand{\subhead}[1]{{\bf \color{DarkBlue} #1}}
+
+\newcommand{\mycircledTerm}[1]{\raisebox{-0.6ex}{\textcircled{\scriptsize #1}}}
+\newcommand{\mycircled}[1]{\textcircled{\scriptsize #1}}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Fix appendix numbering, See
+% http://tex.stackexchange.com/questions/2541/beamer-frame-numbering-in-appendix
+\newcommand{\backupbegin}{%
+   \newcounter{framenumberappendix}
+   \setcounter{framenumberappendix}{\value{framenumber}}
+}
+\newcommand{\backupend}{%
+   \addtocounter{framenumberappendix}{-\value{framenumber}}
+   \addtocounter{framenumber}{\value{framenumberappendix}}
+}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+

@@ -1,0 +1,885 @@
+\documentclass[compress, aspectratio=169,usepdftitle=false]{beamer}
+%\setbeameroption{show notes on second screen=left}
+\usepackage[utf8]{inputenc}
+\usepackage{braket}
+\newcommand{\identity}[0]{\mathbf{1}}
+\newcommand{\Op}[1]{\ensuremath{\mathsf{\hat{#1}}}}
+\def\mat#1{\hat{#1}}
+\def\half{ \frac{1}{2}}
+\newcommand{\TildeOp}[1]{\ensuremath{\mathsf{\tilde{#1}}}}
+\newcommand{\vectorize}{\operatorname{vec}}
+\newcommand{\Abs}[1]{\left|#1\right|}
+\newcommand{\AbsSq}[1]{\left|#1\right|^2}
+\newcommand{\Norm}[1]{\left\lVert#1\right\rVert}
+\newcommand{\NormSq}[1]{\Norm{#1}^2}
+\newcommand{\tr}{\mathsf{tr}}
+\newcommand{\Tr}{\mathsf{tr}}
+\newcommand{\SU}{\ensuremath{\text{SU}}}
+\newcommand{\ketbra}[2]{\ket{#1}\!\bra{#2}}
+\newcommand{\mirror}{\text{mirror}}
+\newcommand{\tgt}{\text{tgt}}
+\newcommand{\pop}{\operatorname{pop}}
+\newcommand{\dd}{\mathsf{d}}
+\newcommand{\ii}{\mathsf{i}}
+\newcommand{\Integers}{\mathbb{Z}}
+\newcommand{\norm}{\operatorname{norm}}
+\renewcommand{\Re}{\mathsf{Re}}
+\renewcommand{\Im}{\mathsf{Im}}
+\newcommand{\partdifquo}[2][{}]{\frac{\partial #1}{\partial #2}}
+\newcommand{\Reals}{\mathbb{R}}
+\newcommand{\Complex}{\mathbb{C}}
+\newcommand{\Liouvillian}{\mathcal{L}}
+\newcommand{\TimeOrder}{\mathcal{T}}
+\newcommand{\SigmaX}{\Op{\sigma}_x}
+\newcommand{\SigmaY}{\Op{\sigma}_y}
+\newcommand{\SigmaZ}{\Op{\sigma}_z}
+\newcommand{\SigmaPlus}{\Op{\sigma}_{\!+}}
+\newcommand{\SigmaMinus}{\Op{\sigma}_{\!-}}
+\usepackage{textcomp} % provides \textmu
+\usepackage{tikz}
+\usepackage{hyperref}
+\usepackage{fontawesome}
+\usetikzlibrary{shapes, arrows.meta, calc, decorations.pathmorphing, backgrounds, positioning}
+
+\usepackage{amsmath, xparse, letltxmacro}
+\LetLtxMacro{\oldunderbrace}{\underbrace}
+
+\DeclareDocumentCommand{\underbrace}{d<> m e{_}}{%
+  \IfValueTF{#1}{% IF <overlay-specification> given
+    % using global onlside flag, cf. p82 beamer manual v3.59
+    \oldunderbrace{#2\onslide<#1>}_{#3}\onslide%
+  }{% ELSE
+    \oldunderbrace{#2}_{#3}
+  }%
+}%
+
+%% Notes on screenshots:
+%
+% - Make sure ``Reduce Transparency'' in the Accessibility settings (Display) is off
+% - Size window to 1270 x 625 (2540 x 1250 retina)
+%   - if no title on slide: increase height +41 to 666  (1332 retina)
+% - Take screenshots at retina resolution
+% - Terminal (iTerm) is at standard size +5 font size increases
+% - JupyterLab in Arc – for slide without title:
+%   - total window size 1364 x 800
+%   - ``Simple Interface'' (View Menu)
+%   - ``Presentation Mode'' (View Menu)
+%   - No status bar (View Menu)
+
+
+\input{arlwide_theme/theme.tex}
+
+\hypersetup{%
+  pdfauthor={Michael Goerz},
+  pdftitle={Optimal Control Techniques for Quantum Interferometry},
+  pdfsubject={Use of QuantumControl.jl in the context of quantum interferometry},
+  pdfkeywords={quantum control; optimal control; quantum dynamics; interferometry; robustness; Julia},
+}
+
+\title{Optimal Control Techniques \\for Quantum Interferometry}
+\author[\href{https://michaelgoerz.net}{https://michaelgoerz.net}]{Michael~H.~Goerz}
+\institute[Army Research Lab]{DEVCOM Army Research Lab}
+\date{IMSI Quantum Hardware Workshop, Chicago, October 30, 2024}
+
+\begin{document}
+
+{%  Title page
+  \setbeamertemplate{footline}{}
+  \frame{%
+    \titlepage
+    \note{\dots}
+  }
+}
+\addtocounter{framenumber}{-1}
+
+\begin{frame}{Quantum Interferometry}
+  \begin{itemize}
+    \item Ensemble of atoms \pause
+    \item Create a superposition \pause
+    \item Separate components \pause
+    \item Accumulate a relative phase \pause
+    \item Recombine \pause
+    \item Imprint phase on measurement
+  \end{itemize}
+\end{frame}
+
+\begin{frame}{Atomic Fountain Interferometer}
+  \begin{textblock}{3}(1.0,1.5)
+    \includegraphics<1,3->[height=6cm]{images/atomic_fountain.pdf}
+  \end{textblock}
+  \begin{textblock}{14}(1.0,2.5)
+    \hfill\includegraphics<2>[trim=0 0 0 0,clip]{images/afioct/fig1.pdf}
+  \end{textblock}
+  \begin{textblock}{14}(1.0,1.5)
+    \hfill\includegraphics<4>[trim=8.3cm 0 0 0,clip]{images/afioct/fig2.pdf}
+  \end{textblock}
+  \begin{textblock}{10}(5.0,7.5)
+      \onslide<2,4->{%
+        \hfill\footnotesize{--- Goerz, Kasevich, Malinovsky.  Atoms 11, 36 (2023)}
+      }
+  \end{textblock}
+\end{frame}
+
+\begin{frame}{Atomic Fountain Interferometer -- Robustness}
+  \begin{textblock}{3}(1.0,1.5)
+    \includegraphics[height=6cm]{images/atomic_fountain.pdf}
+  \end{textblock}
+  \begin{textblock}{13}(1.0,2.25)
+    \hfill\includegraphics[trim=0 0 9.2cm 0,clip]{images/afioct/fig4.pdf}
+  \end{textblock}
+  \begin{textblock}{1}(14.0,2.25)
+    \includegraphics[trim=12.6cm 0 0 0,clip]{images/afioct/fig4.pdf} % colorbar
+  \end{textblock}
+  \begin{textblock}{10}(5.0,7.5)
+    \onslide<1->{%
+      \hfill\footnotesize{--- Goerz, Kasevich, Malinovsky.  Atoms 11, 36 (2023)}
+    }
+  \end{textblock}
+\end{frame}
+
+\begin{frame}{Atomic Fountain Interferometer -- Rapid Adiabatic Passage (RAP)}
+  \begin{textblock}{3}(1.0,1.5)
+    \includegraphics<1-2>[height=6cm]{images/atomic_fountain.pdf}
+  \end{textblock}
+  \begin{textblock}{3}(12.2,5.2)
+    \includegraphics<2->[trim=9.0cm 0 0 0,clip,height=3cm]{images/afioct/fig1.pdf}
+  \end{textblock}
+  \begin{textblock}{14}(1.0,1.5)
+    \hfill\includegraphics<1-2>[trim=8.3cm 0 0 0,clip]{images/afioct/fig2.pdf}
+  \end{textblock}
+  \begin{textblock}{14}(1.0,1.5)
+    \hfill\includegraphics<3>[trim=6.0cm 0 0 0,clip]{images/afioct/fig3.pdf}
+  \end{textblock}
+  \begin{textblock}{10}(5.0,7.5)
+    \footnotesize{--- Goerz, Kasevich, Malinovsky.  Atoms 11, 36 (2023)}
+  \end{textblock}
+\end{frame}
+
+
+\begin{frame}{Atomic Fountain Interferometer -- Robustness RAP}
+  \begin{textblock}{3}(1.0,1.5)
+    \includegraphics<1-2>[height=6cm]{images/atomic_fountain.pdf}
+  \end{textblock}
+  \begin{textblock}{13}(1.0,2.25)
+    \hfill\includegraphics<1>[trim=0 0 9.2cm 0,clip]{images/afioct/fig4.pdf}
+  \end{textblock}
+  \begin{textblock}{13}(1.0,2.25)
+    \hfill\includegraphics<2>[trim=0 0 5.2cm 0,clip]{images/afioct/fig4.pdf}
+  \end{textblock}
+  \begin{textblock}{1}(14.0,2.25)
+    \includegraphics[trim=12.6cm 0 0 0,clip]{images/afioct/fig4.pdf} % colorbar
+  \end{textblock}
+  \begin{textblock}{10}(5.0,7.5)
+    \onslide<1->{%
+      \hfill\footnotesize{--- Goerz, Kasevich, Malinovsky.  Atoms 11, 36 (2023)}
+    }
+  \end{textblock}
+\end{frame}
+
+\begin{frame}{Atomic Fountain Interferometer -- Optimal Control (OCT)}
+  \begin{textblock}{14}(1.0,1.5)
+    \hfill\includegraphics<1>[trim=6.0cm 0 0 0,clip]{images/afioct/fig3.pdf}
+  \end{textblock}
+  \begin{textblock}{14}(1.0,2.0)
+    \includegraphics<2>[trim=0 0 9.5cm 0, clip]{images/afioct/fig6.pdf}
+  \end{textblock}
+  \begin{textblock}{14}(1.0,2.0)
+    \includegraphics<3>[trim=0 0 4.25cm 0, clip]{images/afioct/fig6.pdf}
+  \end{textblock}
+  \begin{textblock}{14}(1.0,2.0)
+    \includegraphics<4>{images/afioct/fig6.pdf}
+  \end{textblock}
+  \begin{textblock}{14}(1.0,1.5)
+    \hfill\includegraphics<5>[trim=6.0cm 0 0 0,clip]{images/afioct/fig3.pdf}
+  \end{textblock}
+  \begin{textblock}{14}(1.0,1.5)
+    \hfill\includegraphics<6>[trim=0 0 0 0,clip]{images/afioct/fig7.pdf}
+  \end{textblock}
+  \begin{textblock}{10}(5.0,7.5)
+    \onslide<1->{%
+      \hfill\footnotesize{--- Goerz, Kasevich, Malinovsky.  Atoms 11, 36 (2023)}
+    }
+  \end{textblock}
+\end{frame}
+
+
+\begin{frame}{Atomic Fountain Interferometer -- Robustness OCT}
+  \begin{textblock}{3}(1.0,1.5)
+    \includegraphics<1>[height=6cm]{images/atomic_fountain.pdf}
+  \end{textblock}
+  \begin{textblock}{13}(1.0,2.25)
+    \hfill\includegraphics<1>[trim=0 0 5.2cm 0,clip]{images/afioct/fig4.pdf}
+  \end{textblock}
+  \begin{textblock}{13}(1.0,2.25)
+    \hfill\includegraphics<2>[trim=0 0 1.2cm 0,clip]{images/afioct/fig4.pdf}
+  \end{textblock}
+  \begin{textblock}{1}(14.0,2.25)
+    \includegraphics[trim=12.6cm 0 0 0,clip]{images/afioct/fig4.pdf}
+  \end{textblock}
+  \begin{textblock}{10}(5.0,7.5)
+    \onslide<1->{%
+      \hfill\footnotesize{--- Goerz, Kasevich, Malinovsky.  Atoms 11, 36 (2023)}
+    }
+  \end{textblock}
+\end{frame}
+
+
+\begin{frame}{JuliaQuantumControl}
+  \begin{textblock}{15.5}(0.25,1.00)
+    \includegraphics<2>[width=\textwidth]{images/JuliaQuantumControl}
+    % \includegraphics<3>[width=\textwidth]{images/JuliaQuantumControlPackages}
+  \end{textblock}
+\end{frame}
+
+
+\begin{frame}
+  \begin{center}
+    {\Large \color{DarkRed} \bf Why Julia?}
+    \vspace{1.5cm}
+    \pause
+    \begin{itemize}
+      \item Performance \pause -- compiles to low-level machine code (matches Fortran) \pause
+      \item Flexibility \pause -- multiple dispatch\pause, ecosystem\pause
+      \item Expressiveness \pause -- clean syntax, unicode, notebook environment
+    \end{itemize}
+  \end{center}
+\end{frame}
+
+
+\begin{frame}{JuliaQuantumControl}
+  \begin{textblock}{15.5}(0.25,1.00)
+    \includegraphics<1->[width=\textwidth]{images/JuliaQuantumControl.png}
+  \end{textblock}
+  \begin{textblock}{14.5}(0.75,5.28)
+    \onslide<2>{%
+      \begin{block}{Design Principle}
+        \begin{center}
+          Maximum performance and composability through abstract interfaces
+        \end{center}
+      \end{block}
+    }
+  \end{textblock}
+\end{frame}
+
+\begin{frame}{Optimization Functional}
+  \begin{textblock}{15.5}(0.25,1.00)
+    \includegraphics[width=\textwidth]{images/functional.png}
+  \end{textblock}
+\end{frame}
+
+\begin{frame}{Control Problem and Trajectories}
+  \begin{textblock}{15.5}(0.25,1.00)
+    \includegraphics<1>[width=\textwidth]{images/api_controlproblem.png}
+    \includegraphics<2>[width=\textwidth]{images/api_controlproblem2.png}
+    \includegraphics<3>[width=\textwidth]{images/api_trajectory.png}
+    \includegraphics<4>[width=\textwidth]{images/api_trajectory2.png}
+  \end{textblock}
+\end{frame}
+
+\begin{frame}{Dynamical Generators}
+  \begin{textblock}{15.5}(0.25,1.00)
+    \includegraphics<1>[width=\textwidth]{images/glossary_generator.png}
+    \includegraphics<2>[width=\textwidth]{images/api_check_generator.png}
+  \end{textblock}
+\end{frame}
+
+\begin{frame}{Optimization schemes}
+  \begin{textblock}{15.5}(0.25,1.50)
+    \includegraphics<2>[width=\textwidth]{images/schemes_comparison.pdf}
+  \end{textblock}
+  \begin{textblock}{10}(5.0,7.2)
+    \onslide<2>{%
+      \hfill\footnotesize{--- Goerz, Carrasco, Malinovsky.  Quantum 6, 871 (2022)}
+    }
+  \end{textblock}
+\end{frame}
+
+
+\begin{frame}{Propagators}
+  \begin{textblock}{15.5}(0.25,1.00)
+    \includegraphics<2>[width=\textwidth]{images/api_propagator.png}
+    \includegraphics<3>[width=\textwidth]{images/api_propagator2.png}
+    \includegraphics<4>[width=\textwidth]{images/differentialequations.png}
+  \end{textblock}
+\end{frame}
+
+
+\begin{frame}{Rotating Tractor Interferometer}
+  \begin{textblock}{13.5}(1.25,0.75)
+    \begin{center}
+      \includegraphics<2>{images/pinwheel}
+    \end{center}
+  \end{textblock}
+  \begin{textblock}{15.5}(1.5,1.50)
+    \only<3->{%
+      \includegraphics{images/rottai_concept}
+    }
+  \end{textblock}
+  \begin{textblock}{8.0}(6.5,1.75)
+    \only<4->{%
+      \begin{equation*}
+        H_{\pm}(\theta, t) = -\frac{\hbar^2}{2M}\frac{\partial^2}{\partial \theta^2} + V_0 \cos\left(m (\theta + \phi_{\pm}(t) )\right)
+      \end{equation*}
+    }
+  \end{textblock}
+  \begin{textblock}{14.0}(1.0,6.25)
+    \only<4->{%
+      In co-moving frame:
+      \vspace{-1.1cm}
+      \begin{equation*}
+          \hspace{2.5cm}
+          \tilde{H}_{\pm} (t)= -\frac{\hbar^2}{2M}\frac{\partial^2}{\partial \theta^2} + V_0 \cos\left(m \theta\right) - i \hbar \omega_{\pm}(t) \frac{\partial}{\partial \theta}
+      \end{equation*}
+    }
+  \end{textblock}
+  \begin{textblock}{10}(5.0,8.2)
+    \onslide<2->{%
+      \hfill\footnotesize{--- Dash, Goerz \emph{et al.} AVS Quantum Sci. 6, 014407 (2023)}
+    }
+  \end{textblock}
+\end{frame}
+
+
+\begin{frame}{Project-Specific Data Structures}
+  \begin{textblock}{15.5}(0.25,1.00)
+    \includegraphics[width=\textwidth]{images/rottai_code}
+  \end{textblock}
+\end{frame}
+
+\begin{frame}{Adiabatic Dynamics of Rotating TAI}
+  \begin{textblock}{7.0}(0.5,1.00)
+    \includegraphics<1-3>{images/animate_rottai/frame_000.pdf}
+    \includegraphics<4>{images/animate_rottai/frame_100.pdf}
+    \includegraphics<5>{images/animate_rottai/frame_200.pdf}
+    \includegraphics<6->{images/animate_rottai/frame_300.pdf}
+  \end{textblock}
+  \begin{textblock}{7.0}(0.5,2.00)
+    \onslide<2>{%
+      \begin{center}
+        {\color{DarkRed}$\pi/2$ pulse}
+      \end{center}
+    }
+  \end{textblock}
+  \begin{textblock}{7.0}(0.5,2.00)
+    \onslide<9>{%
+      \begin{center}
+        {\color{DarkRed}inverse \\ $\pi/2$ pulse}
+      \end{center}
+    }
+  \end{textblock}
+  \begin{textblock}{7.0}(0.5,5.50)
+    \onslide<3->{%
+      \begin{equation*}
+        \omega(t) = \begin{cases}
+          \omega_{0} \sin^2\left(\frac{\pi t}{2 t_r}\right)         & 0 \leq t < t_r            \\
+          \omega_{0}                                                & t_r \leq t < t_r + t_{\text{loop}}  \\
+          \omega_{0} \cos^2\left(\frac{\pi t^\prime }{2t_r} \right) & T - t_r \leq t \leq T
+        \end{cases}
+      \end{equation*}
+    }
+  \end{textblock}
+  \begin{textblock}{7.75}(8.0,2.00)
+    \begin{center}
+      \includegraphics<3-7>{images/adiabatic_dynamics_50πps_1}
+      \includegraphics<8->{images/adiabatic_dynamics_50πps_2}
+    \end{center}
+  \end{textblock}
+  \begin{textblock}{10}(5.0,8.2)
+    \onslide<1->{%
+      \hfill\footnotesize{--- Dash, Goerz \emph{et al.} AVS Quantum Sci. 6, 014407 (2023)}
+    }
+  \end{textblock}
+\end{frame}
+
+\begin{frame}{Interferometric Response of Rotating TAI}
+  \begin{textblock}{15.5}(0.25,1.30)
+    \begin{equation*}
+      \Delta \Phi_S = \frac{4 m\Omega A}{\hbar}\,,
+      \quad
+      A
+      = \frac{R^2}{2}
+        \underbrace{\int_{0}^{T}\omega(t^\prime)dt^\prime}_{=\only<1-4>{n}\only<5>{2}\only<6>{10}\pi}
+    \end{equation*}
+  \end{textblock}
+  \begin{textblock}{15.5}(0.25,3.00)
+    \onslide<2->{%
+      \begin{equation*}
+        |c_{\pm}|^2
+        = \frac{1}{2}
+          \pm \frac{1}{2} \Re\left[{\color<3>{DarkRed}\eta} e^{-i \Delta\Phi}\right]
+        \onslide<4->{%
+          \qquad \rightarrow  \qquad
+          |c_{-}|^2
+          = \frac{1}{2} - \frac{\cos{\Delta\Phi}}{2} = \sin^2\left(\frac{\Delta\Phi}{2}\right)
+        }
+      \end{equation*}
+    }
+  \end{textblock}
+  \begin{textblock}{4}(1.85,4.00)
+    \onslide<3-4>{%
+      \begin{equation*}
+        \color{DarkRed}
+        \eta = \braket{\Psi_{-}(\theta, T)|\Psi_{+}(\theta, T)}
+        = 1 \quad \text{if adiabatic}
+      \end{equation*}
+    }
+  \end{textblock}
+  \begin{textblock}{15.5}(0.25,4.2)
+    \onslide<5->{%
+      \begin{center}
+        \includegraphics<5>{images/cn_sim_results_1.pdf}
+        \includegraphics<6>{images/cn_sim_results_2.pdf}
+      \end{center}
+    }
+  \end{textblock}
+  \begin{textblock}{10}(5.0,8.2)
+    \onslide<5->{%
+      \hfill\footnotesize{--- Dash, Goerz \emph{et al.} AVS Quantum Sci. 6, 014407 (2023)}
+    }
+  \end{textblock}
+\end{frame}
+
+
+\begin{frame}{Non-Adiabatic Dynamics of Rotating TAI}
+  \begin{textblock}{7.75}(0.25,2.00)
+    \includegraphics<1>{images/fidelity_map_1}
+    \includegraphics<2-8>{images/fidelity_map_2}
+  \end{textblock}
+  \begin{textblock}{7.0}(8.5,2.25)
+    \onslide<1-2>{%
+      \begin{equation*}
+        \omega(t) = \begin{cases}
+          \omega_{0} \sin^2\left(\frac{\pi t}{2 t_r}\right)         & 0 \leq t < t_r            \\
+          {\color{gray}\omega_{0}}                                  & {\color{gray}t_r \leq t < t_r + t_{\text{loop}}}  \\
+          {\color{gray}\omega_{0} \cos^2\left(\frac{\pi t^\prime }{2t_r} \right)} & {\color{gray}T - t_r \leq t \leq T}
+        \end{cases}
+      \end{equation*}
+      \vspace{2mm}
+      \par
+      $\ket{\Psi_{\text{tgt}}} = $ ground state of moving potential
+    }
+  \end{textblock}
+  \begin{textblock}{7.75}(8.00,1.00)
+    \includegraphics<3>{images/guess_dynamics_1.pdf}
+    \includegraphics<4>{images/guess_dynamics_2.pdf}
+    \includegraphics<5>{images/guess_dynamics_3.pdf}
+    \includegraphics<6>{images/guess_dynamics_4.pdf}
+    \includegraphics<7>{images/guess_dynamics_5.pdf}
+    \includegraphics<8->{images/guess_dynamics_6.pdf}
+  \end{textblock}
+  \begin{textblock}{7.75}(0.25,2.00)
+    \includegraphics<9-11>{images/guess_sagnac_1.pdf}
+    \includegraphics<12>{images/guess_sagnac_2.pdf}
+  \end{textblock}
+  \begin{textblock}{7.75}(0.25,5.75)
+    \onslide<9->{%
+      \begin{equation*}
+        \Delta \Phi_S = \frac{4 m\Omega A}{\hbar}\,,
+        \quad
+        A = \frac{R^2}{2} \cdot 10\pi
+      \end{equation*}
+    }
+  \end{textblock}
+  \begin{textblock}{7.75}(0.25,7.00)
+    \only<9>{%
+      \begin{equation*}
+        |c_{-}|^2
+        = \frac{1}{2} - \frac{\cos{\Delta\Phi}}{2} = \sin^2\left(\frac{\Delta\Phi}{2}\right)
+      \end{equation*}
+    }
+    \only<10->{%
+      \begin{equation*}
+        |c_{-}|^2
+        = \frac{1}{2} - \frac{1}{2} \Re\left[{\color<11>{DarkRed}\eta} e^{-i \Delta\Phi}\right]
+      \end{equation*}
+    }
+  \end{textblock}
+  \begin{textblock}{10}(5.0,8.2)
+    \onslide<1-6>{%
+      \hfill\footnotesize{--- Dash, Goerz \emph{et al.} AVS Quantum Sci. 6, 014407 (2023)}
+    }
+  \end{textblock}
+\end{frame}
+
+
+\begin{frame}{Rotating TAI Control Problem}
+  \begin{textblock}{15.0}(0.5,1.20)
+    \begin{center}
+      \begin{equation*}
+        \omega(t) = \begin{cases}
+          \omega_{\text{opt}}(t)  & 0 \leq t < t_r            \\
+          \omega_{0}              & t_r \leq t < t_r + t_{\text{loop}}  \\
+          \omega_{\text{opt}}(t') & T - t_r \leq t \leq T
+        \end{cases}
+      \end{equation*}
+      \par
+      \vspace{8mm}
+      Find $\omega_{\text{opt}}(t)$ for short $t_r$ so that
+      \begin{equation*}
+        \color{DarkRed}
+        \Psi(\theta, t=0) \rightarrow \Psi_{\text{tgt}}(\theta, t=t_r)
+      \end{equation*}
+      where $\ket{\Psi_{\text{tgt}}} = $ ground state of moving potential
+    \end{center}
+  \end{textblock}
+\end{frame}
+
+
+\begin{frame}{Optimization with QuantumControl.jl}
+  \begin{textblock}{15.5}(0.25,1.00)
+    \includegraphics<1-2>[width=\textwidth]{images/optimization_screenshot1}
+    \includegraphics<3>[width=\textwidth]{images/optimization_screenshot2}
+  \end{textblock}
+  \begin{textblock}{12.8}(2.0,3.70)
+    \onslide<2>{%
+      \begin{block}{Guided Control}
+        \vspace{2mm}
+        \begin{equation*}
+          \omega_{\text{opt}}(t) = \omega(t) + S(t)\delta\omega(t)
+        \end{equation*}
+        \vspace{2mm}
+      \end{block}
+    }
+  \end{textblock}
+\end{frame}
+
+
+\begin{frame}{Optimized Dynamics or Rotating TAI}
+  \begin{textblock}{7.75}(0.25,1.00)
+    \includegraphics<1-6>{images/guess_dynamics.pdf}
+  \end{textblock}
+  \begin{textblock}{7.75}(8.00,1.00)
+    \includegraphics<2>{images/opt_dynamics_1.pdf}
+    \includegraphics<3>{images/opt_dynamics_2.pdf}
+    \includegraphics<4>{images/opt_dynamics_3.pdf}
+    \includegraphics<5>{images/opt_dynamics_5.pdf}
+    \includegraphics<6->{images/opt_dynamics_6.pdf}
+  \end{textblock}
+  \begin{textblock}{7.75}(0.25,2.00)
+   \includegraphics<7>{images/opt_sagnac_1.pdf}
+   \includegraphics<8->{images/opt_sagnac_2.pdf}
+  \end{textblock}
+  \begin{textblock}{7.75}(0.25,5.75)
+    \onslide<7->{%
+      \begin{equation*}
+        \Delta \Phi_S = \frac{4 m\Omega A}{\hbar}\,,
+        \quad
+        A = \frac{R^2}{2} \cdot 10\pi
+      \end{equation*}
+    }
+  \end{textblock}
+  \begin{textblock}{7.75}(0.25,7.00)
+   \only<7>{%
+     \begin{equation*}
+       |c_{-}|^2
+       = \frac{1}{2} - \frac{1}{2} \Re\left[\eta e^{-i \Delta\Phi}\right]
+     \end{equation*}
+   }
+   \only<8->{%
+     \begin{equation*}
+       |c_{-}|^2
+       = \frac{1}{2} - \frac{\cos{\Delta\Phi}}{2} = \sin^2\left(\frac{\Delta\Phi}{2}\right)
+     \end{equation*}
+   }
+  \end{textblock}
+\end{frame}
+
+
+\begin{frame}{Nuclear Spin Gyroscope}
+  \begin{textblock}{15}(0.5,1.0)
+    \onslide<2>{%
+      \begin{center}
+        \includegraphics[width=\textwidth]{images/JarmolaSA2021_Fig2}
+      \end{center}
+      \hfill {\footnotesize --- Adapted from Fig 2 of Jarmola \textit{et. al.} Sci. Adv. 7, eabl3840 (2021)}
+    }
+  \end{textblock}
+\end{frame}
+
+
+\begin{frame}{NV Center Hamiltonian with Crosstalk}
+  \begin{textblock}{6}(0.5,2.00)
+    \input{images/nvcenter_system_diagram.tikz}
+    % \includegraphics<1>[trim=0 0 4cm 5mm,clip]{images/nvcenter_system_diagram.pdf}
+  \end{textblock}
+  \begin{textblock}{8}(7.0,2.00)
+    \only<1>{%
+      \begin{equation*}
+        \Op{H} = \begin{pmatrix}
+              0     & \Omega(t) &    0                       \\
+          \Omega(t) & \omega_1  & \Omega(t)                  \\
+              0     & \Omega(t)  & \omega_1 - \omega_2
+        \end{pmatrix}
+      \end{equation*}
+      \begin{align*}
+          \Omega(t) &= \Omega_p(t) \cos\left(\omega_p t + \phi_p(t) + \phi_p^{(i)}\right)  \\
+                    &\quad + \Omega_s(t) \cos\left(\omega_s t + \phi_s(t) + \phi_s^{(i)}\right)
+      \end{align*}
+    }
+    \only<2>{%
+      \begin{equation*}
+        \Op{H}_{\text{RWA}} = \begin{pmatrix}
+            -\frac{\delta}{2}  &   \Omega_{1,0}(t)   &    0              \\
+            \Omega_{1,0}^*(t)  &      \Delta         & \Omega_{0,-1}(t)  \\
+                    0          & \Omega_{0,-1}^*(t)  & \frac{\delta}{2}
+        \end{pmatrix}
+      \end{equation*}
+      \begin{align*}
+        \Omega_{1,0}(t) &= \frac{\Omega_p(t)}{2} e^{i \phi_p^{(i)}} + \frac{\Omega_s(t)}{2} e^{i\phi_s^{(i)}} e^{-i \omega_{ps} t} \\
+        \Omega_{0,-1}(t) &= \frac{\Omega_s^*(t)}{2} e^{-i \phi_p^{(i)}} + \frac{\Omega_p^*(t)}{2} e^{-i\phi_s^{(i)}} e^{-i \omega_{ps} t}
+      \end{align*}
+    }
+  \end{textblock}
+  \begin{textblock}{15.5}(0.25,1.00)
+    \includegraphics<3>[width=\textwidth]{images/ramsey_ham_code.png}
+  \end{textblock}
+\end{frame}
+
+
+\begin{frame}{Parameterized Pulses}
+  \begin{textblock}{15.5}(0.25,1.00)
+    \includegraphics<2>[width=\textwidth]{images/nvramsey_nb_parameterziation.png}
+    \includegraphics<3>[width=\textwidth]{images/pulse_parameterization.png}
+  \end{textblock}
+\end{frame}
+
+
+\begin{frame}{Population Response Signal}
+  \begin{textblock}{15}(0.5,1.0)
+    \begin{center}
+      \includegraphics<2>{images/ramsey_1}
+      \includegraphics<3>{images/ramsey_2}
+      \includegraphics<4>{images/ramsey_3}
+      \includegraphics<5->{images/ramsey_4}
+    \end{center}
+  \end{textblock}
+  \begin{textblock}{15}(0.5,5.0)
+    \begin{center}
+      \includegraphics<2-5>[height=3.5cm]{images/JarmolaSA2021_Fig2}
+    \end{center}
+  \end{textblock}
+  \begin{textblock}{13}(1.5,5.5)
+    \onslide<6->{%
+      \begin{center}
+        \begin{block}{}
+          \begin{equation*}
+            J_T(\{\ket{\Psi_{\mu,\tau}(T)}\})
+            = \sum_{\mu} \left\vert
+            \text{FFT}([P_0({\color<7>{DarkRed}\tau}; {\color<7>{DarkRed}\mu})]) - \text{FFT}([P_0({\tau}; {\mu}=1)])
+              \right\vert
+          \end{equation*}
+          Make spectrum for any $\mu$ look like spectrum for $\mu = 1$
+        \end{block}
+      \end{center}
+    }
+  \end{textblock}
+\end{frame}
+
+
+\begin{frame}{NV Center Optimization Problem}
+  \begin{textblock}{15.5}(0.25,1.00)
+    \includegraphics<2,6>[width=\textwidth]{images/nvramsey_nb_problem.png}
+    \includegraphics<1>[width=\textwidth]{images/nvramsey_nb_problem1.png}
+    \includegraphics<3-4>[width=\textwidth]{images/nvramsey_nb_problem2.png}
+    \includegraphics<5>[width=\textwidth]{images/nvramsey_nb_problem3.png}
+    \includegraphics<7->[width=\textwidth]{images/nvramsey_nb_problem4.png}
+  \end{textblock}
+  \begin{textblock}{13}(1.5,5.5)
+    \onslide<1-3,5-6>{%
+      \begin{center}
+        \begin{block}{}
+          \begin{equation*}
+            J_T(\{\ket{\Psi_{\mu,\tau}(T)}\})
+            = \sum_{\mu} \left\vert
+            {\color<6>{DarkRed}\text{FFT}}([P_0({\color<1-5>{DarkRed}\tau}; {\color<1>{DarkRed}\mu})]) - {\color<6>{DarkRed}\text{FFT}}([P_0({\color<2-5>{DarkRed}\tau}; {\mu}=1)])
+              \right\vert
+          \end{equation*}
+          Make spectrum for any $\mu$ look like spectrum for $\mu = 1$
+        \end{block}
+      \end{center}
+    }
+  \end{textblock}
+  \begin{textblock}{13}(1.5,5.5)
+    \onslide<4>{%
+      \begin{center}
+        \begin{block}{}
+          \begin{equation*}
+            \Omega_{1,0}(t) = \frac{\Omega_p(t)}{2} e^{i \color{DarkRed}\phi_p^{(i)}} + \frac{\Omega_s(t)}{2} e^{i \color{DarkRed}\phi_s^{(i)}} e^{-i \omega_{ps} t}
+          \end{equation*}
+          Absorb phase difference in RF pulse
+        \end{block}
+      \end{center}
+    }
+  \end{textblock}
+  \begin{textblock}{13}(1.5,2.05)
+    \onslide<7->{%
+      \begin{center}
+        \begin{block}{}
+          \begin{equation*}
+            J_T(\{\ket{\Psi_{\mu,\tau}(T)}\})
+            = \sum_{\mu} \left\vert
+            {\color{DarkRed}\text{FFT}}([P_0({\tau}; {\mu})]) - {\color{DarkRed}\text{FFT}}([P_0({\tau}; {\mu}=1)])
+              \right\vert
+          \end{equation*}
+          Make spectrum for any $\mu$ look like spectrum for $\mu = 1$
+        \end{block}
+      \end{center}
+    }
+  \end{textblock}
+\end{frame}
+
+\begin{frame}{Semi-automatic differentiation}
+  \begin{textblock}{13}(1.5,2.05)
+    \onslide<1>{%
+      \begin{center}
+        \begin{block}{}
+          \begin{equation*}
+            J_T(\{\ket{\Psi_{\mu,\tau}(T)}\})
+            = \sum_{\mu} \left\vert
+            {\color{DarkRed}\text{FFT}}([P_0({\tau}; {\mu})]) - {\color{DarkRed}\text{FFT}}([P_0({\tau}; {\mu}=1)])
+              \right\vert
+          \end{equation*}
+          Make spectrum for any $\mu$ look like spectrum for $\mu = 1$
+        \end{block}
+      \end{center}
+    }
+  \end{textblock}
+  \begin{textblock}{7}(8.5,2.25)
+    \onslide<3>{%
+      Automatic Differentiation:\par
+      evaluate $J_T$ inside AD framework
+    }
+  \end{textblock}
+  \begin{textblock}{14}(1.0,4.0)
+    \onslide<4,5>{%
+      \begin{block}{Semi-AD}
+        Use a chain rule to split the gradient into
+        \begin{itemize}
+          \item a numerically expensive but analytic part
+          \item a non-analytic but computationally cheap part
+      \end{itemize}
+      \end{block}
+    }
+  \end{textblock}
+  \begin{textblock}{7}(1.0,2.0)
+    \onslide<2->{%
+      \begin{equation*}
+        \begin{split}
+          \nabla J_T
+          &= \frac{\partial J_T\only<5->{(\{\Psi_k(T)\})}}{\partial \epsilon_{nl}}
+          \\
+          \onslide<6->{%
+          &= 2 \Re \Bigg[
+            \sum_k
+              {\color<6>{white}\underbrace{\color{black}\frac{\partial J_T}{\partial \ket{\Psi_k(T)}}}_{\equiv \bra{\chi_k}}}
+              \frac{\partial \ket{\Psi_k(T)}}{\partial \epsilon_{nl}}
+            \Bigg]
+          }
+          \\
+          \onslide<8->{%
+          &= 2 \Re \Bigg[
+            \sum_k
+              \frac{\partial}{\partial \epsilon_{nl}}
+              {\braket{\chi_k(T) | \Psi_k(T)}}
+            \Bigg]
+          }
+        \end{split}
+      \end{equation*}
+    }
+  \end{textblock}
+  \begin{textblock}{7}(8.5,2.5)
+    \includegraphics<9->[width=\textwidth]{images/grape_scheme}
+  \end{textblock}
+  \begin{textblock}{15}(1.0,7.5)
+    \onslide<4->{%
+      \footnotesize{--- Goerz, Carrasco, Malinovsky.  Quantum 6, 871 (2022)}
+    }
+  \end{textblock}
+\end{frame}
+
+
+\begin{frame}{NV Center Optimized Pulses}
+  \begin{textblock}{15.5}(0.25,1.00)
+    \includegraphics<2>[width=\textwidth]{images/nvramsey_nb_solution1.png}
+    \includegraphics<3>[width=\textwidth]{images/nvramsey_nb_solution2.png}
+  \end{textblock}
+\end{frame}
+
+
+\begin{frame}{Optimized Signal Spectrum}
+  \begin{textblock}{15}(0.5,1.0)
+    \begin{center}
+      \includegraphics<1>{images/ramsey_4}
+      \includegraphics<2>{images/ramsey_5}
+      \includegraphics<3>{images/ramsey_6}
+      \includegraphics<4>{images/ramsey_7}
+      \includegraphics<5>{images/ramsey_8}
+    \end{center}
+  \end{textblock}
+  \begin{textblock}{13}(1.5,5.5)
+    \onslide<1>{%
+      \begin{center}
+        \begin{block}{}
+          \begin{equation*}
+            J_T(\{\ket{\Psi_{\mu,\tau}(T)}\})
+            = \sum_{\mu} \left\vert
+                \text{FFT}([P_0(\tau; \mu)]) - \text{FFT}([P_0(\tau; \mu=1)])
+              \right\vert
+          \end{equation*}
+          Make spectrum for any $\mu$ look like spectrum for $\mu = 1$
+        \end{block}
+      \end{center}
+    }
+  \end{textblock}
+\end{frame}
+
+\begin{frame}{Conclusion}
+  \begin{textblock}{13}(1.5,1.5)
+    \onslide<1->{%
+      \begin{itemize}
+        \item<2-> Quantum Interferometry Implementations
+          \begin{itemize}
+            \item<3-> Atomic Fountain Interferometer: robust momentum space transfer
+            \item<4-> Rotating Tractor Interferometer: non-adiabatic phase space transport
+            \item<5-> Nuclear Spin Gyroscope: ``double quantum'' control, spectral optimization
+          \end{itemize}
+      \end{itemize}
+    }
+  \end{textblock}
+  \begin{textblock}{14}(1.0,3.75)
+    \includegraphics<6>[width=\textwidth]{images/attribution.pdf}
+  \end{textblock}
+  \begin{textblock}{13}(1.5,4.0)
+    \onslide<7->{%
+      \begin{itemize}
+        \item<7-> QuantumControl.jl Framework
+          \begin{itemize}
+            \item<8-> Define control problems in terms of ``trajectories''
+            \item<9-> Define dynamics in terms of ``generators'' and stateful ``propagators''
+            \item<10-> Separate ``control amplitudes`` from actual ``controls''
+            \item<11-> Efficient project-specific data structures through multiple dispatch
+          \end{itemize}
+      \end{itemize}
+    }
+  \end{textblock}
+  \begin{textblock}{13}(1.5,7.0)
+    \onslide<12>{%
+      \begin{center}
+        {\color{DarkRed}
+        \Large Thank You!
+        }
+      \end{center}
+    }
+  \end{textblock}
+\end{frame}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\appendix
+\backupbegin
+
+\begin{frame} \end{frame}
+
+\backupend
+
+\end{document}

@@ -1,0 +1,83 @@
+%\documentclass[aps, pra, onecolumn, superscriptaddress, floatfix]{revtex4-2}
+%\usepackage[utf8]{inputenc}
+%\usepackage{amsmath}
+%\usepackage{mathpazo}
+%\usepackage{braket}
+%\usepackage[hidelinks]{hyperref}
+%\usepackage{graphicx}
+%
+%
+%\usepackage{tikz,pgflibraryshapes}
+%\usetikzlibrary{calc}
+%\usetikzlibrary{decorations.pathmorphing}
+%\usetikzlibrary{arrows.meta}
+%\usetikzlibrary{positioning}
+%
+%\usepackage[psfixbb,graphics,tightpage,active]{preview}
+%
+%\PreviewEnvironment{tikzpicture}
+%
+\tikzset{arrow/.style={-{Latex[length=3pt]}}}
+\tikzset{doublearrow/.style={{Latex[length=3pt]}-{Latex[length=3pt]}}}
+%
+%\begin{document}
+\begin{tikzpicture}
+  \definecolor{red}{RGB}{192,0,0}
+  \definecolor{blue}{RGB}{3,110,189}
+  \footnotesize
+  % \node[right] at (-0.7, 3.5)  {(a)};
+  % \node[right] at (3.2, 3.5)  {(b)};
+  % \begin{scope}[xscale=0.25,yscale=0.28] % Level Diagram
+  \begin{scope}[xscale=0.4,yscale=0.4] % Level Diagram
+    \def\LevelMinusOne{3}
+    \def\LevelZero{10}
+    \def\DeltaP{2}
+    \def\DeltaS{4}
+    \def\Width{10}
+    \def\xOmegaOne{0.05}  % x coordinate for ω₁ line, as portion of \Width
+    \def\xOmegaP{0.275}  % x coordinate for ωₚ line, as portion of \Width
+    \def\xOmegaS{0.725}  % x coordinate for ωₛ line, as portion of \Width
+    \pgfmathsetmacro{\SinglePhotonDetuning}{0.5*(\DeltaP + \DeltaS)}
+    % Energy Levels
+    \draw[thick] (0, 0) node[left]{$\ket{+1}$} -- +(\Width, 0);
+    \draw[thick] (0.4*\Width, \LevelMinusOne) -- ++(0.6*\Width, 0) node[right]{$\ket{-1}$};
+    \draw[thick] (0, \LevelZero) node[left]{$\ket{0}$} -- +(\Width, 0);
+    % Detuning Levels
+    \draw[dashed] (0.15 * \Width, \LevelZero - \DeltaP) -- +(0.35 * \Width, 0);
+    \draw[dashed] (0.35 * \Width, \LevelZero - \DeltaS) -- +(0.5 * \Width, 0);
+    \draw[dashed] (0.475 * \Width, \LevelZero - \SinglePhotonDetuning) -- +(0.2 * \Width, 0);
+    %  Arrows
+    \draw[arrow, red, thick] (\xOmegaP * \Width, 0) -- +(0, \LevelZero - \DeltaP) node[midway, left, red]{$\omega_p$};
+    \draw[arrow] (\xOmegaOne * \Width, 0) -- +(0, \LevelZero) node[midway, left]{$\omega_1$};
+    \draw[arrow] (\xOmegaP * \Width, \LevelZero) -- +(0, -\DeltaP) node[midway, left]{$\Delta_p$};
+    \draw[arrow, blue, thick] (\xOmegaS * \Width, \LevelMinusOne) -- +(0, \LevelZero - \DeltaS - \LevelMinusOne) node[midway, right, blue]{$\omega_s$};
+    \draw[arrow] (\xOmegaS * \Width, \LevelZero) -- +(0, -\DeltaS) node[midway, right]{$\Delta_s$};
+    \draw[arrow] (0.95 * \Width, \LevelMinusOne) -- +(0, \LevelZero - \LevelMinusOne) node[midway, right]{$\omega_2$};
+    \draw[arrow] (0.425 * \Width, \LevelZero - \DeltaS) -- +(0, \DeltaS - \DeltaP) node[midway, left]{$\delta$};
+    \draw[arrow] (0.575 * \Width, \LevelZero) -- +(0, -0.5 * \DeltaS - 0.5 * \DeltaP) node[pos=0.28, left]{$\Delta$};
+    \draw[arrow] (0.575 * \Width, 0) -- +(0, \LevelMinusOne) node[midway, right]{$\omega_{12}$};
+  \end{scope}
+  %\begin{scope}[xscale=0.7, yscale=1.0, xshift=5.5cm, yshift=0.55cm] % pulse sequence
+  %  \def\pulseLength{1.5}
+  %  \def\tauLength{1.5}
+  %  \def\extraBeforeAfter{0.5}
+  %  \def\boxPad{0.2}
+  %  \pgfmathsetmacro{\timeLength}{2*\extraBeforeAfter + 2*\pulseLength + \tauLength}
+  %  \draw[blue, thick] (-\extraBeforeAfter, 0) -- +(\timeLength, 0);
+  %  \draw[red, thick] (-\extraBeforeAfter, 1) -- +(\timeLength, 0);
+  %  \draw[dashed] (0,-0.5) node[below]{0} -- +(0, 3);
+  %  \draw[dashed] (\pulseLength,-0.5) node[below]{$T$} -- +(0, 3);
+  %  \draw[dashed] (\pulseLength + \tauLength, -0.5) node[below]{$T+\tau$} -- +(0, 3);
+  %  \draw[dashed] (2 * \pulseLength + \tauLength,-0.5) node[below]{$2T + \tau$} -- +(0, 3);
+  %  \draw[fill=blue] (\boxPad, 0) rectangle +(\pulseLength - 2 * \boxPad, 1-\boxPad) node[pos=.5,white] {$\Omega_s$};;
+  %  \draw[fill=blue] (\pulseLength + \tauLength + \boxPad, 0) rectangle +(\pulseLength - 2 * \boxPad, 1-\boxPad) node[pos=.5,white] {$\Omega_s$};;
+  %  \draw[fill=red] (\boxPad, 1) rectangle +(\pulseLength - 2 * \boxPad, 1-\boxPad) node[pos=.5,white] {$\Omega_p$};;
+  %  \draw[fill=red] (\pulseLength + \tauLength + \boxPad, 1) rectangle +(\pulseLength - 2 * \boxPad, 1-\boxPad) node[pos=.5,white] {$\Omega_p$};;
+  %  \draw[semithick, rounded corners] (0, -\boxPad) rectangle +(\pulseLength, 2 + \boxPad);
+  %  \draw[semithick, rounded corners] (\pulseLength + \tauLength, -\boxPad) rectangle +(\pulseLength, 2 + \boxPad);
+  %  \node at (0.5 * \pulseLength, 2.25) {$\pi/2$};
+  %  \node at (\pulseLength + \tauLength + 0.5 * \pulseLength, 2.25) {$\pi/2$};
+  %  \draw[doublearrow] (\pulseLength, 2.25) -- +(\tauLength, 0) node[midway, below]{$\tau$};
+  %\end{scope}
+\end{tikzpicture}
+%\end{document}

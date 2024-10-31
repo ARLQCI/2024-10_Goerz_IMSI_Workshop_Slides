@@ -878,7 +878,269 @@
 \appendix
 \backupbegin
 
-\begin{frame} \end{frame}
+\begin{frame}\end{frame}
+
+\begin{frame}{Semi-Automatic Differentiation}
+  \begin{textblock}{14}(1.0,1.25)
+    \only<1>{{\color{Red}\bf Quantum 6, 871 (2022) --- arXiv:2205.15044}}
+  \end{textblock}
+  \begin{textblock}{14}(1.0,1.75)
+    \only<1>{%
+      \frame{\includegraphics[width=\textwidth]{images/SemiAD_firstpage}}
+    }
+  \end{textblock}
+  \begin{textblock}{14}(1.0,6.25)
+    \only<4>{{\color{Red}\bf Goerz \emph{at al.} Quantum 6, 871 (2022) --- arXiv:2205.15044}}
+  \end{textblock}
+  \begin{textblock}{3.0}(12.25,1.75)
+    \only<1>{%
+      \begin{center}
+        \includegraphics[width=1.5cm]{images/profile/seba.jpeg}\\
+        \includegraphics[width=1.5cm]{images/profile/vlad.jpg}
+      \end{center}
+    }
+  \end{textblock}
+  \begin{textblock}{10}(3.0, 7.02)
+    \only<1>{\tiny
+      \setbeamercolor{upcol}{fg=black,bg=gray!20}
+      \setbeamercolor{lowcol}{fg=black,bg=gray!10}
+      \begin{beamerboxesrounded}[upper=upcol,lower=lowcol]{Funding}
+       DEVCOM Army Research Laboratory, Cooperative Agreement Numbers W911NF-16-2-0147, \\W911NF-21-2-0037; DIRA-TRC No. DTR19-CI-019
+      \end{beamerboxesrounded}
+    }
+  \end{textblock}
+  \begin{textblock}{15}(0.5, 1.0)
+    \only<2->{%
+      \begin{align*}
+        \onslide<3->{\nabla}J(\{\epsilon_{nl}\})
+          &= \onslide<3->{\frac{\partial}{\partial_{\epsilon_{nl}}}}
+              J_T(\{\ket{\Psi_k(T)}\}) + \dots \\
+        \onslide<5->{%
+          &= 2\Re \sum_k
+            \underbrace<6->{\frac{\partial J_T}{\partial \ket{\Psi_k(T)}}}_{%
+              \equiv \bra{\chi_k(T)}
+            }
+            \frac{\partial \ket{\Psi_k(T)}}{\partial \epsilon_{nl}}
+            \onslide<6->{%
+              ; \qquad {\color<8->{DarkRed}\ket{\chi_k(T)} = \frac{\partial J_T}{\partial \bra{\Psi_k(T)}}}
+            }
+            \\
+        }
+        \onslide<7->{%
+          &= 2 \Re \sum_k \frac{\partial}{\partial \epsilon_{nl}} \langle \chi_k(T) \vert \Psi_k(T) \rangle \\
+        }
+        \onslide<9->{%
+          &= 2 \Re \sum_k \frac{\partial}{\partial \epsilon_{nl}} \langle \chi_k(T) \vert
+              \Op{U}_N \dots \Op{U}_{n+1} \Op{U}_{n}  \Op{U}_{n-1} \dots \Op{U}_1  \vert
+              \Psi_k(t=0) \rangle  \\
+        }
+        \onslide<10->{%
+          &= 2 \Re \sum_k
+            \underbrace<11->{%
+              \Big\langle \chi_k(T) \Big\vert \Op{U}_N \dots \Op{U}_{n+1} {\color<12>{DarkRed}\frac{\partial \Op{U}_n}{\partial \epsilon_{nl}}}
+            }_{\text{backward propagation}}\;
+            \underbrace<11->{%
+              \Op{U}_{n-1} \dots \Op{U}_1 \Big\vert \Psi_k(t=0) \Big\rangle
+            }_{\text{forward propagation}}
+        }
+      \end{align*}
+    }
+  \end{textblock}
+\end{frame}
+
+
+\begin{frame}{Aside: Wirtinger derivatives --- derivatives w.r.t. complex numbers}
+  %\begin{textblock}{3.0}(0.5,1.0)
+    \begin{equation*}
+      J_T (\{z_k\}) = J_T(\{\Re[z_k], \Im[z_k]\}); \qquad J_T \in \Reals, \quad z_k \in \Complex
+    \end{equation*}
+    \pause
+    \begin{equation*}
+      \frac{\partial J_T (\{z_k\})}{\partial \epsilon_{nl}} =
+      \sum_k \left(
+        \frac{\partial J_T}{\partial \Re[z_k]}
+        \frac{\partial \Re[z_k]}{\partial \epsilon_{nl}}
+        + \frac{\partial J_T}{\partial \Im[z_k]}
+        \frac{\partial \Im[z_k]}{\partial \epsilon_{nl}}
+      \right);
+      \qquad \epsilon_{nl} \in \Reals
+    \end{equation*}
+    \pause
+    {
+      \color{DarkRed}
+      \begin{align*}
+        \text{Define} \quad \frac{\partial J_T (\{z_k\})}{\partial z_k}
+        & \equiv \frac{1}{2} \left(
+          \frac{\partial J_T}{\partial \Re[z_k]}
+          - i \frac{\partial J_T}{\partial \Im[z_k]}
+        \right) \\
+        \frac{\partial J_T (\{z_k\})}{\partial z_k^*}
+        & \equiv \frac{1}{2} \left(
+          \frac{\partial J_T}{\partial \Re[z_k]}
+          + i \frac{\partial J_T}{\partial \Im[z_k]}
+        \right)
+        = \left(\frac{\partial J_T}{\partial z_k}\right)^*
+      \end{align*}
+    }
+    \vspace{1mm}
+    \pause
+    \begin{equation*}
+       \frac{\partial J_T (\{z_k\})}{\partial \epsilon_{nl}}
+       =
+       \sum_k \left(
+         \frac{\partial J_T}{\partial z_k}
+         \frac{\partial z_k}{\partial \epsilon_{nl}}
+         + \frac{\partial J_T}{\partial z_k^*}
+         \frac{\partial z_k^*}{\partial \epsilon_{nl}}
+       \right)
+      =
+       2 \Re \left[
+        \sum_k
+        \frac{\partial J_T}{\partial z_k} \frac{\partial z_k}{\partial \epsilon_{nl}}
+       \right]
+    \end{equation*}
+  %\end{textblock}
+\end{frame}
+
+
+\begin{frame}{Gradient of Time Evolution Operator}
+    \begin{equation*}%
+      \begin{pmatrix}
+        \frac{\partial \Op{U}^{\dagger}_n}{\partial \epsilon_{n1}} \ket{\chi_k(t_{n})} \\
+          \vdots\\
+          \frac{\partial \Op{U}^{\dagger}_n}{\partial \epsilon_{nL}} \ket{\chi_k(t_{n})} \\
+          \Op{U}^{\dagger}_n \ket{\chi_k(t_{n})}
+        \end{pmatrix}
+      = \exp \left[-\ii \begin{pmatrix}
+        \Op{H}^\dagger_n & 0 & \dots & 0 &\Op{H}_n^{(1)\dagger} \\
+        0 & \Op{H}^\dagger_n & \dots & 0 & \Op{H}_n^{(2)\dagger} \\
+        \vdots & & \ddots & & \vdots \\
+        0 & 0 & \dots & \Op{H}^\dagger_n & \Op{H}_n^{(L)\dagger} \\
+        0 & 0 & \dots & 0 & \Op{H}^\dagger_n\,,
+      \end{pmatrix} dt_n\right]
+      \begin{pmatrix} 0 \\ \vdots \\ 0 \\ \ket{\chi_k(t_n)} \end{pmatrix}
+    \end{equation*}
+    \vspace{5mm}
+    \begin{equation*}
+      \Op{U}_n = \exp[-\ii \Op{H}_n dt_n]\,;
+      \qquad
+      \Op{H}_n^{(l)} = \frac{\partial \Op{H}_n}{\partial \epsilon_l(t)}
+    \end{equation*}
+    \par
+    \vspace{5mm}
+    \hfill \footnotesize{--- Goodwin, Kuprov, J. Chem. Phys. 143, 084113 (2015)}\\
+    \vspace{3mm}
+    \hfill \footnotesize{\url{https://github.com/JuliaQuantumControl/QuantumGradientGenerators.jl}}
+\end{frame}
+
+\begin{frame}{Generalized GRAPE scheme}
+  \begin{textblock}{15}(0.5,1.0)
+    \begin{center}
+      \input{images/grape.tikz}
+    \end{center}
+  \end{textblock}
+  \begin{textblock}{3}(11.5, 1.4)
+    \begin{tikzpicture}
+      \draw<4-> (0,0) node[line width = 3pt, draw=black, inner sep = 6pt, fill=gray!20,rounded corners=10] {
+        $\tau^{(k)} = \Braket{\chi_k(T)|\Psi_k(T)}$
+      };
+    \end{tikzpicture}
+  \end{textblock}
+  \begin{textblock}{3}(0.3, 1.4)
+    \begin{tikzpicture}
+      \draw<5-> (0,0) node[line width = 3pt, draw=black, inner sep = 6pt, fill=gray!20,rounded corners=10] {
+        $\nabla J_T = 2 \Re \sum_k \nabla \tau^{(k)}$
+      };
+    \end{tikzpicture}
+  \end{textblock}
+  \begin{textblock}{15}(0.5,8.15)
+    \hfill \footnotesize{--- Goerz \emph{et al.} Quantum 6, 871 (2022)}
+  \end{textblock}
+\end{frame}
+
+\begin{frame}{Semi-Automatic Differentiation}
+  \begin{center}
+    \begin{equation*}
+      {\color{DarkRed}\ket{\chi_k(T)} = \frac{\partial J_T}{\partial \bra{\Psi_k(T)}}}
+    \end{equation*}
+    \par \vspace{5mm}
+    is the only thing evaluated inside AD framework
+  \end{center}
+  \vspace{8mm}
+  \begin{itemize}
+    \pause
+    \item[$\rightarrow$]  $J_T = J_T(\Op{U})$
+    \pause
+    \item[$\rightarrow$] $J_T = J_T(\{\tau_k\})$ with $\tau_k = \Braket{\Psi_k(T) | \Psi_k^{\tgt}}$
+  \end{itemize}
+\end{frame}
+
+
+\begin{frame}{Gradients of parametrized pulses}
+    \begin{equation*}%
+      \begin{pmatrix}
+        \frac{\partial \Op{U}}{\partial u_1} \ket{\Psi_k} \\
+          \vdots\\
+          \frac{\partial \Op{U}}{\partial u_N} \ket{\Psi_k} \\
+          \Op{U} \ket{\Psi_k}
+        \end{pmatrix}
+      = \exp \left[-\ii \TimeOrder \int_0^T \begin{pmatrix}
+        \Op{H}(t) & 0 & \dots & 0 &\Op{H}^{(1)}(t) \\
+        0 & \Op{H}(t) & \dots & 0 & \Op{H}^{(2)}(t) \\
+        \vdots & & \ddots & & \vdots \\
+        0 & 0 & \dots & \Op{H}(t) & \Op{H}^{(N)}(t) \\
+        0 & 0 & \dots & 0 & \Op{H}(t)
+      \end{pmatrix} dt\right]
+      \begin{pmatrix} 0 \\ \vdots \\ 0 \\ \ket{\Psi_k} \end{pmatrix}
+    \end{equation*}
+    \par
+    \vspace{5mm}
+    \hspace{1cm}
+    with $\Op{H}^{(n)}(t) = \frac{\partial \Op{H}(t)}{\partial u_n}$
+    \par
+    \vspace{5mm}
+    {\footnotesize
+      \hfill --- ``GOAT'': Machnes \textit{et al.}  Phys. Rev. Lett. 120, 150401 (2018)
+    }
+    \hfill \footnotesize{\url{https://github.com/JuliaQuantumControl/QuantumGradientGenerators.jl}}
+
+\end{frame}
+
+
+\begin{frame}{Open Quantum Systems}
+  \subhead{Lindblad equation:}
+  \begin{align*}
+  \frac{d}{dt}\Op{\rho}(t)
+      & =-i\left[\Op{H},\Op{\rho}(t)\right]+\mathcal{L}_{D}(\Op{\rho}(t))\\
+      & =-i\left[\Op{H},\Op{\rho}(t)\right]+\sum_{k}\left(\Op{A}_{k}\Op{\rho}\Op{A}_{k}^{\dagger}-\frac{1}{2}\Op{A}_{k}^{\dagger}\Op{A}_{k}\Op{\rho}-\frac{1}{2}\Op{\rho}\Op{A}_{k}^{\dagger}\Op{A}_{k}\right)
+  \end{align*}
+  \subhead{Vectorization rule:}
+  \begin{equation*}
+    \vectorize\left(\Op{A} \Op{\rho} \Op{B} \right)
+    = \left(\mat{B}^{T} \otimes \mat{A}\right) \vec{\rho}
+  \end{equation*}
+  \subhead{Matrix representation of Lindbladian:}
+  \begin{equation*}
+    \mat{L} =
+      -i (\identity \otimes \mat{H}) + i (\mat{H}^T \otimes \identity)
+      + \sum_k \left[
+        (\mat{A}_k^\dagger)^T \otimes \mat{A}_k
+        - \half \left(\identity \otimes \mat{A}_k^\dagger \mat{A}_k\right)
+        - \half \left((\mat{A}_k^\dagger \mat{A}_k)^T \otimes \identity\right)
+        \right]\
+  \end{equation*}
+  \hfill {\footnotesize --- Goerz \textit{et. al.} arXiv:1312.0111v2 (2021), Appendix B}
+\end{frame}
+
+
+\begin{frame}{Gradient-free optimization}
+  \begin{center}
+  \includegraphics{images/nelder_mead}\\
+      {\footnotesize\vspace{-2mm}\hspace{-15mm} Doria et al. PRL 106, 190501 (2011)}
+  \end{center}
+  \vspace{12pt}
+  e.g. Nelder-Mead (simplex), genetic algorithms\dots
+\end{frame}
 
 \backupend
 

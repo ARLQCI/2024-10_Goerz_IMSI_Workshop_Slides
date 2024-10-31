@@ -12,7 +12,7 @@ slides.pdf: slides.tex .venv/bin/python $(wildcard images/*.py images/*.tex imag
 	pdflatex $(PDFLATEXOPTS) slides
 
 handout.pdf: slides.pdf
-	pdfjam slides.pdf 1,2,3,7,9,10,11,12,13,14,15,16,18,20,24,25,26,28,29,30,31,32,43,47,48,53,56,57,61,62,64,68,69,73,74,78,81,84,88,89,96,100,103,104,105,106 --fitpaper true -o handout.pdf
+	pdfjam slides.pdf 1,7,8,9,11,12,15,17,18,21,23,25,27,35,37,38,40,42,43,44,46,48,49,50,52,54,55,56,63,68,70,72,79,82,83,84,85,86,92,94,96,97,98,99,101,102,107,108,110,113,114,116,119,121,125,127,128,133,139,145,146,172 --fitpaper true -o handout.pdf
 
 pdflatex:
 	@echo "Compiling Main File ..."
